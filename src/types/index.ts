@@ -26,6 +26,8 @@ export interface Product {
   lastRestocked: Date;
   avgDailyConsumption: number;
   position: [number, number, number]; // Posición 3D [x, y, z]
+  isPerishable?: boolean; // Si el producto es perecedero
+  defaultShelfLife?: number; // Días de vida útil por defecto
 }
 
 // Alerta de inventario
@@ -135,4 +137,64 @@ export interface Expense {
   amount: number;
   description: string;
   supplierId?: string;
+}
+
+// ========== SISTEMA DE LOTES Y CADUCIDAD ==========
+
+// Estado de lote según proximidad de caducidad
+export type BatchStatus = 'active' | 'warning' | 'critical' | 'expired' | 'sold';
+
+// Lote de producto
+export interface ProductBatch {
+  id: string;
+  productId: string;
+  batchNumber: string;          // Número de lote
+  expirationDate: Date;          // Fecha de caducidad
+  manufactureDate?: Date;        // Fecha de fabricación
+  quantity: number;              // Cantidad en el lote
+  originalQuantity: number;      // Cantidad original del lote
+  supplier?: string;             // Proveedor
+  purchasePrice?: number;        // Precio de compra
+  status: BatchStatus;
+  receivedDate: Date;            // Fecha de recepción
+  notes?: string;
+}
+
+// Alerta de caducidad
+export interface ExpirationAlert {
+  id: string;
+  batch: ProductBatch;
+  product: Product;
+  daysUntilExpiration: number;
+  status: BatchStatus;
+  message: string;
+  priority: number;              // 1=crítico, 2=urgente, 3=próximo
+  suggestedDiscount?: number;    // Descuento sugerido (%)
+}
+
+// Estadísticas de caducidad
+export interface ExpirationStats {
+  totalBatches: number;
+  activeBatches: number;
+  expiredBatches: number;
+  expiringIn3Days: number;
+  expiringIn7Days: number;
+  expiringIn15Days: number;
+  totalValueAtRisk: number;      // Valor total de productos por vencer
+  totalLosses: number;           // Pérdidas por productos caducados
+}
+
+// Reporte de pérdidas por caducidad
+export interface ExpirationLossReport {
+  period: string;
+  totalLosses: number;
+  lossesCount: number;
+  lossesByCategory: Record<Category, number>;
+  lossesBySupplier: Record<string, number>;
+  topExpiredProducts: Array<{
+    productId: string;
+    productName: string;
+    quantity: number;
+    value: number;
+  }>;
 }

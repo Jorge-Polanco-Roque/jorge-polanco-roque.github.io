@@ -27,7 +27,7 @@ if (!ANTHROPIC_API_KEY) {
   console.error('⚠️ VITE_ANTHROPIC_API_KEY not found in environment variables');
 }
 
-// Initialize Claude client
+// Initialize Claude client with system prompt
 const model = new ChatAnthropic({
   anthropicApiKey: ANTHROPIC_API_KEY,
   modelName: CLAUDE_MODEL,
@@ -316,8 +316,12 @@ export async function processAgentMessage(
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
 ): Promise<string> {
   try {
-    // Build messages array WITHOUT system prompt (it's already bound to model)
+    // Build messages array with system prompt as first message
     const messages = [
+      {
+        role: 'system' as const,
+        content: SYSTEM_PROMPT,
+      },
       ...conversationHistory.map(msg => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content,
@@ -331,10 +335,8 @@ export async function processAgentMessage(
     // Bind tools to the model
     const modelWithTools = model.bindTools(tools);
 
-    // Make initial API call with tools and system prompt
-    let response = await modelWithTools.invoke(messages, {
-      system: SYSTEM_PROMPT,
-    });
+    // Make initial API call with tools
+    let response = await modelWithTools.invoke(messages);
 
     // Handle tool calls in a loop (agent may make multiple tool calls)
     let iterationCount = 0;
@@ -374,9 +376,7 @@ export async function processAgentMessage(
       });
 
       // Get next response from Claude with tool results
-      response = await modelWithTools.invoke(messages, {
-        system: SYSTEM_PROMPT,
-      });
+      response = await modelWithTools.invoke(messages);
     }
 
     // Extract final text response

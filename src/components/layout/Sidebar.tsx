@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, AlertTriangle, TrendingUp, Package, Moon, Sun, Store, ShoppingCart, DollarSign, Users } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, TrendingUp, Package, Moon, Sun, Store, ShoppingCart, DollarSign, Users, Calendar } from 'lucide-react';
 import useInventoryStore from '../../store/inventoryStore';
 
 export default function Sidebar() {
@@ -12,6 +12,7 @@ export default function Sidebar() {
     { to: '/customers', icon: Users, label: 'Clientes' },
     { to: '/inventory', icon: Package, label: 'Inventario' },
     { to: '/alerts', icon: AlertTriangle, label: 'Alertas' },
+    { to: '/expiration', icon: Calendar, label: 'Caducidad' },
     { to: '/forecast', icon: TrendingUp, label: 'Pronósticos' },
   ];
 

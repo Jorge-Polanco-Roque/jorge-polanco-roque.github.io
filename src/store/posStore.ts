@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Product, CartItem, Transaction, Customer } from '../types';
 import { initializeMockPOSData } from '../utils/generateMockData';
+import useBatchStore from './batchStore';
+import { isPerishableProduct } from '../utils/expirationUtils';
 
 interface POSStore {
   // State
@@ -177,6 +179,28 @@ const usePOSStore = create<POSStore>()(
         set(state => ({
           transactions: [transaction, ...state.transactions],
         }));
+
+        // Consumir de lotes usando FEFO para productos perecederos
+        cart.forEach((item) => {
+          const product = item.product;
+          if (isPerishableProduct(product)) {
+            const batchStore = useBatchStore.getState();
+            const productBatches = batchStore.getBatchesByProduct(product.id);
+            let remainingQuantity = item.quantity;
+
+            // Consumir de lotes usando FEFO
+            for (const batch of productBatches) {
+              if (remainingQuantity <= 0) break;
+              if (batch.quantity <= 0 || batch.status === 'expired' || batch.status === 'sold') {
+                continue;
+              }
+
+              const quantityToConsume = Math.min(batch.quantity, remainingQuantity);
+              batchStore.consumeFromBatch(batch.id, quantityToConsume);
+              remainingQuantity -= quantityToConsume;
+            }
+          }
+        });
 
         get().clearCart();
 
