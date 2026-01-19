@@ -93,7 +93,7 @@
                 document.getElementById('message').innerHTML = '<div class="success">✅ Storage limpiado exitosamente! Redirigiendo...</div>';
 
                 setTimeout(() => {
-                    window.location.href = '/POS/';
+                    window.location.href = '/';
                 }, 2000);
             } catch (error) {
                 document.getElementById('message').innerHTML = '<div style="color: red;">❌ Error: ' + error.message + '</div>';
@@ -101,7 +101,7 @@
         }
 
         function goHome() {
-            window.location.href = '/POS/';
+            window.location.href = '/';
         }
     </script>
 </body>
