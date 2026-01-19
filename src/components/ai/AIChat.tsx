@@ -2,21 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Trash2, Sparkles } from 'lucide-react';
 import useAIStore from '../../store/aiStore';
-import useInventoryStore from '../../store/inventoryStore';
-import usePOSStore from '../../store/posStore';
-import { processAgentMessage } from '../../utils/langGraphAgent';
-import { generateAIResponse } from '../../utils/aiAssistant';
 import Button from '../ui/Button';
 
 export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [useRealAgent, setUseRealAgent] = useState(false); // Toggle entre real/simulado
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, addMessage, clearMessages, isTyping, setTyping } = useAIStore();
-  const { products } = useInventoryStore();
-  const { transactions, customers } = usePOSStore();
 
   // Scroll al último mensaje
   useEffect(() => {
@@ -40,58 +33,16 @@ export default function AIChat() {
     // Mostrar indicador de typing
     setTyping(true);
 
-    try {
-      let response: string;
+    // Simular delay de respuesta
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-      if (useRealAgent) {
-        // Preparar historial de conversación (últimos 10 mensajes para contexto)
-        const conversationHistory = messages.slice(-10).map(msg => ({
-          role: msg.role,
-          content: msg.content,
-        }));
+    // Agregar respuesta del placeholder
+    addMessage({
+      role: 'assistant',
+      content: 'ESTO ES UN PLACEHOLDER',
+    });
 
-        // Llamar al agente real de Claude con LangGraph
-        response = await processAgentMessage(
-          userMessage,
-          { products, transactions, customers },
-          conversationHistory
-        );
-      } else {
-        // Usar asistente simulado (sin API)
-        await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
-        response = generateAIResponse(userMessage, products, transactions, customers);
-      }
-
-      // Agregar respuesta del asistente
-      addMessage({
-        role: 'assistant',
-        content: response,
-      });
-    } catch (error: any) {
-      console.error('Error calling agent:', error);
-
-      // Si falla el agente real, cambiar automáticamente al simulado
-      if (useRealAgent && error.message?.includes('credit balance')) {
-        setUseRealAgent(false);
-        addMessage({
-          role: 'assistant',
-          content: `⚠️ Tu cuenta de Anthropic no tiene créditos suficientes. He activado el modo simulado automáticamente.\n\nPara usar el agente real con Claude API:\n1. Ve a https://console.anthropic.com/settings/billing\n2. Agrega un método de pago\n3. Recarga la página y activa "Usar Agente Real"\n\nMientras tanto, puedo responderte con el asistente simulado. ¿En qué puedo ayudarte?`,
-        });
-      } else if (useRealAgent && error.message?.includes('No API key configured')) {
-        setUseRealAgent(false);
-        addMessage({
-          role: 'assistant',
-          content: `⚠️ No tienes una API Key configurada. El modo real requiere una API key de Anthropic.\n\nPara configurar tu API key:\n1. Ve a ⚙️ Configuración en el menú lateral\n2. Ingresa tu API key de Anthropic\n3. Activa el modo "🤖 Agente Real"\n\nMientras tanto, he activado el modo simulado. ¿En qué puedo ayudarte?`,
-        });
-      } else {
-        addMessage({
-          role: 'assistant',
-          content: `❌ Lo siento, hubo un error al procesar tu mensaje. ${error.message || 'Por favor intenta de nuevo.'}`,
-        });
-      }
-    } finally {
-      setTyping(false);
-    }
+    setTyping(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -147,22 +98,9 @@ export default function AIChat() {
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
                   </h3>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {useRealAgent ? 'Modo Real (Claude API)' : 'Modo Simulado'}
-                    </p>
-                    <button
-                      onClick={() => setUseRealAgent(!useRealAgent)}
-                      className={`text-[10px] px-2 py-0.5 rounded-full transition-all ${
-                        useRealAgent
-                          ? 'bg-blue-500 text-white hover:bg-blue-600'
-                          : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-500'
-                      }`}
-                      title="Cambiar entre modo real (Claude API) y simulado"
-                    >
-                      {useRealAgent ? '🤖 API' : '💭 Sim'}
-                    </button>
-                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Demo Mode
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
