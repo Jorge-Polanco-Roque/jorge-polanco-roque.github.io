@@ -271,15 +271,18 @@ Las contribuciones son bienvenidas. Para cambios importantes:
 
 ## 📝 Roadmap
 
-- [ ] Deploy a Vercel/Netlify
-- [ ] Backend con API REST (Node.js/Express)
-- [ ] Base de datos PostgreSQL/MongoDB
-- [ ] Autenticación de usuarios
-- [ ] Reportes PDF exportables
-- [ ] Integración con impresoras de tickets
-- [ ] App móvil con React Native
-- [ ] Multi-tienda support
-- [ ] Integración con WhatsApp Business
+### Próximas Funcionalidades Principales
+
+- [ ] **📅 Sistema de Fechas de Caducidad** - Control de lotes y FEFO
+- [ ] **📦 Sistema de Seguimiento** - Trazabilidad completa de productos
+- [ ] **🔔 Notificaciones Inteligentes** - Alertas multi-canal
+- [ ] **📊 Reportes Avanzados** - Análisis profundo de negocio
+- [ ] **🖨️ Impresión y Etiquetado** - Etiquetas de lotes y precios
+- [ ] **📱 App Móvil** - iOS y Android con modo offline
+- [ ] **🌐 Backend Multi-usuario** - API REST y roles
+- [ ] **🔄 Integraciones** - Facturación, pagos, contabilidad
+
+**👉 Ver roadmap completo y detallado en [NEXT_STEPS.md](./NEXT_STEPS.md)**
 
 ---
 
