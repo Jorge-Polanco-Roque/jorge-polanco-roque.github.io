@@ -18,22 +18,44 @@ import {
   getCustomerInsights,
 } from './advancedAgentTools';
 
-// Get API configuration from environment
-const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
+// Get API key from localStorage (user-provided) or fallback to env
+function getApiKey(): string | undefined {
+  // Primero intenta obtener del localStorage (API key del usuario)
+  const userApiKey = typeof window !== 'undefined' ? localStorage.getItem('anthropic_api_key') : null;
+  if (userApiKey) {
+    return userApiKey;
+  }
+
+  // Fallback a variable de entorno (solo para desarrollo local)
+  return import.meta.env.VITE_ANTHROPIC_API_KEY;
+}
+
+// Get API configuration
 const CLAUDE_MODEL = import.meta.env.VITE_CLAUDE_MODEL || 'claude-3-5-sonnet-20241022';
 const MAX_TOKENS = parseInt(import.meta.env.VITE_MAX_TOKENS || '4096');
 
-if (!ANTHROPIC_API_KEY) {
-  console.error('⚠️ VITE_ANTHROPIC_API_KEY not found in environment variables');
-}
+// Crear función para inicializar el modelo con la API key actual
+function createModel() {
+  const apiKey = getApiKey();
 
-// Initialize Claude client with system prompt
-const model = new ChatAnthropic({
-  anthropicApiKey: ANTHROPIC_API_KEY,
-  modelName: CLAUDE_MODEL,
-  maxTokens: MAX_TOKENS,
-  temperature: 0.7,
-});
+  if (!apiKey) {
+    console.warn('⚠️ No API key configured. Agent will fail. Please add your API key in Settings.');
+    // Retornar un modelo con una key dummy para evitar crashes
+    return new ChatAnthropic({
+      anthropicApiKey: 'dummy-key',
+      modelName: CLAUDE_MODEL,
+      maxTokens: MAX_TOKENS,
+      temperature: 0.7,
+    });
+  }
+
+  return new ChatAnthropic({
+    anthropicApiKey: apiKey,
+    modelName: CLAUDE_MODEL,
+    maxTokens: MAX_TOKENS,
+    temperature: 0.7,
+  });
+}
 
 // Tool definitions for Claude API
 const tools = [
@@ -316,6 +338,15 @@ export async function processAgentMessage(
   conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
 ): Promise<string> {
   try {
+    // Verificar si hay API key configurada
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      throw new Error('No API key configured. Please add your API key in Settings to use the real AI agent.');
+    }
+
+    // Crear modelo con la API key actual
+    const model = createModel();
+
     // Build messages array with system prompt as first message
     const messages = [
       {

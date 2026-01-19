@@ -77,6 +77,12 @@ export default function AIChat() {
           role: 'assistant',
           content: `⚠️ Tu cuenta de Anthropic no tiene créditos suficientes. He activado el modo simulado automáticamente.\n\nPara usar el agente real con Claude API:\n1. Ve a https://console.anthropic.com/settings/billing\n2. Agrega un método de pago\n3. Recarga la página y activa "Usar Agente Real"\n\nMientras tanto, puedo responderte con el asistente simulado. ¿En qué puedo ayudarte?`,
         });
+      } else if (useRealAgent && error.message?.includes('No API key configured')) {
+        setUseRealAgent(false);
+        addMessage({
+          role: 'assistant',
+          content: `⚠️ No tienes una API Key configurada. El modo real requiere una API key de Anthropic.\n\nPara configurar tu API key:\n1. Ve a ⚙️ Configuración en el menú lateral\n2. Ingresa tu API key de Anthropic\n3. Activa el modo "🤖 Agente Real"\n\nMientras tanto, he activado el modo simulado. ¿En qué puedo ayudarte?`,
+        });
       } else {
         addMessage({
           role: 'assistant',

@@ -9,6 +9,7 @@ import POS from './pages/POS';
 import Sales from './pages/Sales';
 import Customers from './pages/Customers';
 import ExpirationControl from './pages/ExpirationControl';
+import Settings from './pages/Settings';
 import AIChat from './components/ai/AIChat';
 import useInventoryStore from './store/inventoryStore';
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="/sales" element={<Sales />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/expiration" element={<ExpirationControl />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
 
